@@ -445,7 +445,8 @@ export default function AIChat() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.json();
+        throw new Error(`HTTP error! message: ${errorText.details}`);
       }
 
       const data: APIResponse = await response.json();
@@ -471,7 +472,7 @@ export default function AIChat() {
         newMessages[newMessages.length - 1] = {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: "I apologize, but I encountered an error. Please try again.",
+          content: `I encountered an error while processing your request. Error: ${error instanceof Error ? error.message : String(error)}`,
         };
         return newMessages;
       });
