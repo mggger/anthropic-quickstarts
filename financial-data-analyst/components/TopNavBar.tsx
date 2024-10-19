@@ -37,7 +37,7 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ features = {} }) => {
     <div className="flex items-center justify-between p-4">
       <div className="font-bold text-xl flex gap-2 items-center">
         <Image
-          src={theme === "dark" ? "/wordmark-dark.svg" : "/wordmark.svg"}
+          src="/logo.png"
           alt="Company Wordmark"
           width={112}
           height={20}
