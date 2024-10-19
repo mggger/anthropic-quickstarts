@@ -116,7 +116,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
     <div className="flex items-start gap-2">
       {message.role === "assistant" && (
         <Avatar className="w-8 h-8 border">
-          <AvatarImage src="/ant-logo.svg" alt="AI Assistant Avatar" />
+          <AvatarImage src="/logo2.png" alt="AI Assistant Avatar" />
           <AvatarFallback>AI</AvatarFallback>
         </Avatar>
       )}
@@ -533,7 +533,7 @@ export default function AIChat() {
                   <>
                     <Avatar className="w-8 h-8 border">
                       <AvatarImage
-                        src="/ant-logo.svg"
+                        src="/logo2.png"
                         alt="AI Assistant Avatar"
                       />
                       <AvatarFallback>AI</AvatarFallback>
@@ -576,7 +576,7 @@ export default function AIChat() {
               <div className="flex flex-col items-center justify-center h-full animate-fade-in-up max-w-[95%] mx-auto">
                 <Avatar className="w-10 h-10 mb-4 border">
                   <AvatarImage
-                    src="/ant-logo.svg"
+                    src="/logo2.png"
                     alt="AI Assistant Avatar"
                     width={40}
                     height={40}
