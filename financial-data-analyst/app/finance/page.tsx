@@ -153,7 +153,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
                   <ChartLine className="w-4 h-4 mr-1" /> Generated Chart
                 </Badge>
               )}
-              <span>{message.content}</span>
+              <span className="break-words">{message.content}</span>
             </div>
           ) : (
             <span>{message.content}</span>
