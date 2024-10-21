@@ -1,48 +1,32 @@
 // @ts-nocheck
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Textarea} from "@/components/ui/textarea";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Send,
-  ChevronDown,
-  Paperclip,
-  ChartLine,
   ChartArea,
-  FileInput,
-  MessageCircleQuestion,
   ChartColumnBig,
+  ChartLine,
+  ChevronDown,
   Database,
   DatabaseZap,
-  Loader2
+  FileInput,
+  Loader2,
+  MessageCircleQuestion,
+  Paperclip,
+  Send
 } from "lucide-react";
 import FilePreview from "@/components/FilePreview";
-import { ChartRenderer } from "@/components/ChartRenderer";
-import { toast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { ChartData } from "@/types/chart";
+import {ChartRenderer} from "@/components/ChartRenderer";
+import {toast} from "@/hooks/use-toast";
+import {Badge} from "@/components/ui/badge";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+import type {ChartData} from "@/types/chart";
 import TopNavBar from "@/components/TopNavBar";
-import {
-  readFileAsText,
-  readFileAsBase64,
-  readFileAsPDFText,
-} from "@/utils/fileHandling";
+import {readFileAsBase64, readFileAsPDFText, readFileAsText,} from "@/utils/fileHandling";
 
 // Types
 interface Message {
@@ -822,6 +806,30 @@ export default function AIChat() {
                     </div>
                   </div>
                 </div>
+                {activeDataSource && (
+                    <div className="mt-8 w-full max-w-2xl mx-auto bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 rounded-lg border p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-2xl font-semibold flex items-center space-x-2">
+                          <Database className="h-7 w-7 text-primary" />
+                          <span>Available Tables for Exploration</span>
+                        </h3>
+                        <Badge variant="secondary" className="text-sm px-3 py-1">
+                          {activeDataSource.tables.length} Tables
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {activeDataSource.tables.map((table, index) => (
+                            <Card key={index} className="hover:shadow-md transition-all duration-300 hover:scale-105 bg-card">
+                              <CardContent className="p-4 flex items-center space-x-3">
+                                <span className="font-medium text-base truncate flex-1" title={table}>
+                {table}
+              </span>
+                              </CardContent>
+                            </Card>
+                        ))}
+                      </div>
+                    </div>
+                )}
               </div>
             )}
           </CardContent>
