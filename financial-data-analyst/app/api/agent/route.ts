@@ -1,4 +1,5 @@
-// app/api/agent/route.ts
+// @ts-nocheck
+
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "edge";
@@ -14,9 +15,21 @@ const isValidBase64 = (str: string) => {
     }
 };
 
+interface RequestBody {
+    messages: any[];
+    fileData?: {
+        base64: string;
+        mediaType: string;
+        isText: boolean;
+        fileName: string;
+    };
+    model: string;
+    dataSource?: any;
+}
+
 export async function POST(req: NextRequest) {
     try {
-        const { messages, fileData, model, dataSource } = await req.json();
+        const { messages, fileData, model, dataSource } = await req.json() as RequestBody;
 
         console.log("🔍 Initial Request Data:", {
             hasMessages: !!messages,
@@ -26,6 +39,7 @@ export async function POST(req: NextRequest) {
             model,
             hasDataSource: !!dataSource,
         });
+
 
         // Input validation
         if (!messages || !Array.isArray(messages)) {

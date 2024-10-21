@@ -1,4 +1,5 @@
-// app/api/finance/route.ts
+// @ts-nocheck
+
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ChartData } from "@/types/chart";

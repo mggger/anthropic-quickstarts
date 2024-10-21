@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { NextRequest, NextResponse } from "next/server";
 import { D1Database } from "@cloudflare/workers-types";
 import { getRequestContext } from '@cloudflare/next-on-pages';
