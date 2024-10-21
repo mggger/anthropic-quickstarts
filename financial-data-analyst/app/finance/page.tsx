@@ -690,7 +690,7 @@ export default function AIChat() {
                           variant="ghost"
                           size="icon"
                           onClick={() => fileInputRef.current?.click()}
-                          disabled={isLoading || isUploading}
+                          disabled={isLoading || isUploading || !!activeDataSource}
                           className="h-8 w-8"
                       >
                         <Paperclip className="h-5 w-5" />
