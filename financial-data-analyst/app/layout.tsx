@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
+import React from "react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,6 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+    <head><title>Freight Companion</title></head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

@@ -22,6 +22,9 @@ import {
   FileInput,
   MessageCircleQuestion,
   ChartColumnBig,
+  Database,
+  DatabaseZap,
+  Loader2
 } from "lucide-react";
 import FilePreview from "@/components/FilePreview";
 import { ChartRenderer } from "@/components/ChartRenderer";
@@ -208,6 +211,41 @@ export default function AIChat() {
   const [currentChartIndex, setCurrentChartIndex] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const [isScrollLocked, setIsScrollLocked] = useState(false);
+
+  const [dataSources, setDataSources] = useState([]);
+  const [activeDataSource, setActiveDataSource] = useState(null);
+  const [isLoadingSources, setIsLoadingSources] = useState(true);
+
+  useEffect(() => {
+    const fetchDataSources = async () => {
+      try {
+        const response = await fetch('/api/postgresql-config');
+        if (!response.ok) throw new Error('Failed to fetch data sources');
+        const data = await response.json();
+        setDataSources(data);
+      } catch (error) {
+        console.error('Error fetching data sources:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch data sources.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingSources(false);
+      }
+    };
+
+    fetchDataSources();
+  }, []);
+
+  const activateDataSource = (dataSource) => {
+    setActiveDataSource(dataSource);
+    toast({
+      title: "Data Source Activated",
+      description: `${dataSource.name} is now active. You can query this database.`,
+    });
+  };
+
 
   useEffect(() => {
     const scrollToBottom = () => {
@@ -433,10 +471,18 @@ export default function AIChat() {
     const requestBody = {
       messages: apiMessages,
       model: selectedModel,
+      dataSource: activeDataSource ? {
+        host: activeDataSource.host,
+        port: activeDataSource.port,
+        database: activeDataSource.database,
+        username: activeDataSource.username,
+        password: activeDataSource.password,
+        tables: activeDataSource.tables,
+      } : null,
     };
 
     try {
-      const response = await fetch("/api/finance", {
+      const response = await fetch("/api/agent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -590,7 +636,7 @@ export default function AIChat() {
                     <ChartArea className="text-muted-foreground w-6 h-6" />
                     <p className="text-muted-foreground">
                       I can analyze financial data and create visualizations
-                      from your files.
+                      from your database.
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -631,47 +677,90 @@ export default function AIChat() {
             <form onSubmit={handleSubmit} className="w-full">
               <div className="flex flex-col space-y-2">
                 {currentUpload && (
-                  <FilePreview
-                    file={currentUpload}
-                    onRemove={() => setCurrentUpload(null)}
-                  />
+                    <FilePreview
+                        file={currentUpload}
+                        onRemove={() => setCurrentUpload(null)}
+                    />
                 )}
                 <div className="flex items-end space-x-2">
                   <div className="flex-1 relative">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isLoading || isUploading}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8"
-                    >
-                      <Paperclip className="h-5 w-5" />
-                    </Button>
+                    <div className="absolute left-2 top-1/2 -translate-y-1/2 flex space-x-1">
+                      <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isLoading || isUploading}
+                          className="h-8 w-8"
+                      >
+                        <Paperclip className="h-5 w-5" />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              disabled={isLoading}
+                          >
+                            {activeDataSource ? (
+                                <DatabaseZap className="h-5 w-5 text-primary" />
+                            ) : (
+                                <Database className="h-5 w-5" />
+                            )}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          {isLoadingSources ? (
+                              <DropdownMenuItem disabled>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Loading sources...
+                              </DropdownMenuItem>
+                          ) : dataSources.length === 0 ? (
+                              <DropdownMenuItem disabled>
+                                No data sources available
+                              </DropdownMenuItem>
+                          ) : (
+                              dataSources.map((source) => (
+                                  <DropdownMenuItem
+                                      key={source.id}
+                                      onSelect={() => activateDataSource(source)}
+                                  >
+                                    {source.name}
+                                    {activeDataSource?.id === source.id && (
+                                        <Badge variant="secondary" className="ml-2">Active</Badge>
+                                    )}
+                                  </DropdownMenuItem>
+                              ))
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                     <Textarea
-                      value={input}
-                      onChange={handleInputChange}
-                      onKeyDown={handleKeyDown}
-                      placeholder="Type your message..."
-                      disabled={isLoading}
-                      className="min-h-[44px] h-[44px] resize-none pl-12 py-3 flex items-center"
-                      rows={1}
+                        value={input}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Type your message..."
+                        disabled={isLoading}
+                        className="min-h-[44px] h-[44px] resize-none pl-24 py-3 flex items-center"
+                        rows={1}
                     />
                   </div>
                   <Button
-                    type="submit"
-                    disabled={isLoading || (!input.trim() && !currentUpload)}
-                    className="h-[44px]"
+                      type="submit"
+                      disabled={isLoading || (!input.trim() && !currentUpload && !activeDataSource)}
+                      className="h-[44px]"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                onChange={handleFileSelect}
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={handleFileSelect}
               />
             </form>
           </CardFooter>

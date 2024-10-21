@@ -1,0 +1,18 @@
+CREATE TABLE data_sources (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  host TEXT NOT NULL,
+  port INTEGER NOT NULL,
+  database TEXT NOT NULL,
+  username TEXT NOT NULL,
+  password TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE tables (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  data_source_id INTEGER,
+  FOREIGN KEY (data_source_id) REFERENCES data_sources(id)
+);
