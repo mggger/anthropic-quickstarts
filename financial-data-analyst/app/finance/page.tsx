@@ -586,7 +586,7 @@ export default function AIChat() {
                     </Avatar>
                     <div>
                       <CardTitle className="text-lg">
-                        Financial Assistant
+                        Multi-Agent Analyst
                       </CardTitle>
                       <CardDescription className="text-xs">
                         Powered by Freight Companion
@@ -629,13 +629,13 @@ export default function AIChat() {
                   />
                 </Avatar>
                 <h2 className="text-xl font-semibold mb-2">
-                  Financial Assistant
+                  Multi-Agent Analyst
                 </h2>
                 <div className="space-y-4 text-base">
                   <div className="flex items-center gap-3">
                     <ChartArea className="text-muted-foreground w-6 h-6" />
                     <p className="text-muted-foreground">
-                      I can analyze financial data and create visualizations
+                      I can analyze your data and create visualizations
                       from your database.
                     </p>
                   </div>
@@ -649,7 +649,7 @@ export default function AIChat() {
                   <div className="flex items-center gap-3">
                     <MessageCircleQuestion className="text-muted-foreground w-6 h-6" />
                     <p className="text-muted-foreground">
-                      Ask questions about your financial data and I&apos;ll
+                      Ask questions about your data and I&apos;ll
                       create insightful charts.
                     </p>
                   </div>
