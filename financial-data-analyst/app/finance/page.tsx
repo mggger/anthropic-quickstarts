@@ -803,6 +803,7 @@ export default function AIChat() {
                       <Badge variant="outline">Area Charts</Badge>
                       <Badge variant="outline">Linear Charts</Badge>
                       <Badge variant="outline">Pie Charts</Badge>
+                      <Badge variant="outline">Tabular</Badge>
                     </div>
                   </div>
                 </div>

@@ -1,14 +1,30 @@
-// types/chart.ts
+export type DataFormat = "text" | "number" | "percentage" | "currency";
+export type ColumnAlign = "left" | "center" | "right";
+
+export interface TableColumnConfig {
+  label: string;
+  format?: DataFormat;
+  align?: ColumnAlign;
+  width?: string;
+  color?: string;
+}
+
 export interface ChartConfig {
-  [key: string]: {
+  [key: string]: TableColumnConfig | {
     label: string;
     stacked?: boolean;
     color?: string;
   };
 }
 
+export interface ColumnDefinition {
+  key: string;
+  label: string;
+  format?: DataFormat;
+}
+
 export interface ChartData {
-  chartType: "bar" | "multiBar" | "line" | "pie" | "area" | "stackedArea";
+  chartType: "bar" | "multiBar" | "line" | "pie" | "area" | "stackedArea" | "tabular";
   config: {
     title: string;
     description: string;
@@ -19,6 +35,7 @@ export interface ChartData {
     footer?: string;
     totalLabel?: string;
     xAxisKey?: string;
+    columns?: ColumnDefinition[]; // 新增表格列定义
   };
   data: Array<Record<string, any>>;
   chartConfig: ChartConfig;

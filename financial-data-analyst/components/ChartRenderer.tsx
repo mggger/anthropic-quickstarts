@@ -9,7 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import {Table, TableBody, TableCell, TableCaption, TableRow, TableHeader, TableHead, TableFooter} from "@/components/ui/table";
+import {Button} from "@/components/ui/button"
+import { TrendingUp, TrendingDown, Download } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -28,7 +30,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import type { ChartData } from "@/types/chart";
+import type { ChartData, TableColumnConfig } from "@/types/chart";
 
 function BarChartComponent({ data }: { data: ChartData }) {
   const dataKey = Object.keys(data.chartConfig)[0];
@@ -388,6 +390,175 @@ function AreaChartComponent({
   );
 }
 
+
+function formatValue(value: any, format?: string): string {
+    if (value === null || value === undefined) return '';
+
+    switch (format) {
+        case 'number':
+            return typeof value === 'number' ? value.toLocaleString() : value;
+        case 'percentage':
+            return typeof value === 'number'
+                ? `${(value * 100).toFixed(2)}%`
+                : value;
+        case 'currency':
+            return typeof value === 'number'
+                ? new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(value)
+                : value;
+        default:
+            return String(value);
+    }
+}
+
+export function TabularChartComponent({ data }: { data: ChartData }) {
+    // 使用配置的列定义或从数据中推断
+    const headers = React.useMemo(() => {
+        if (data.config.columns) {
+            return data.config.columns.map(col => col.key);
+        }
+        const firstRow = data.data[0] || {};
+        return Object.keys(firstRow).filter(key =>
+            !['id', '_id', 'uuid'].includes(key.toLowerCase())
+        );
+    }, [data.data, data.config.columns]);
+
+    // 获取列配置
+    const getColumnConfig = (header: string): TableColumnConfig => {
+        const columnDef = data.config.columns?.find(col => col.key === header);
+        const configDef = data.chartConfig[header] as TableColumnConfig;
+
+        return {
+            label: columnDef?.label || configDef?.label || header,
+            format: columnDef?.format || configDef?.format,
+            align: configDef?.align || (columnDef?.format === 'number' ? 'right' : 'left'),
+            width: configDef?.width,
+            color: configDef?.color
+        };
+    };
+
+    const handleExportCSV = () => {
+        // 构建 CSV 内容
+        const columnConfigs = headers.map(header => getColumnConfig(header));
+        const headerRow = columnConfigs.map(config => config.label).join(',');
+
+        const dataRows = data.data.map(row => {
+            return headers.map(header => {
+                const value = row[header];
+                // 处理包含逗号的文本
+                const formattedValue = formatValue(value, getColumnConfig(header).format);
+                return typeof formattedValue === 'string' && formattedValue.includes(',')
+                    ? `"${formattedValue}"`
+                    : formattedValue;
+            }).join(',');
+        });
+
+        const csvContent = [headerRow, ...dataRows].join('\n');
+
+        // 创建并下载文件
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `${data.config.title || 'export'}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    return (
+        <div className="w-full space-y-4">
+            {(data.config.title || data.config.description) && (
+                <div className="space-y-1.5">
+                    {data.config.title && (
+                        <h3 className="text-lg font-semibold leading-none tracking-tight">
+                            {data.config.title}
+                        </h3>
+                    )}
+                    {data.config.description && (
+                        <p className="text-sm text-muted-foreground">
+                            {data.config.description}
+                        </p>
+                    )}
+                    <div className="pt-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className=""
+                        onClick={handleExportCSV}
+                    >
+                        <Download className="h-4 w-4 mr-1" />
+                        Export CSV
+                    </Button>
+                    </div>
+                </div>
+            )}
+
+            <Table>
+                {data.config.footer && (
+                    <TableCaption>{data.config.footer}</TableCaption>
+                )}
+
+                <TableHeader>
+                    <TableRow>
+                        {headers.map((header) => {
+                            const config = getColumnConfig(header);
+                            return (
+                                <TableHead
+                                    key={header}
+                                    style={{ width: config.width || 'auto' }}
+                                    className={config.align === 'right' ? 'text-right' : 'text-left'}
+                                >
+                                    {config.label}
+                                </TableHead>
+                            );
+                        })}
+                    </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                    {data.data.map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                            {headers.map((header) => {
+                                const config = getColumnConfig(header);
+                                const value = row[header];
+                                return (
+                                    <TableCell
+                                        key={header}
+                                        className={`text-${config.align || 'left'}`}
+                                        style={{
+                                            width: config.width || 'auto'
+                                        }}
+                                    >
+                                        {formatValue(value, config.format)}
+                                    </TableCell>
+                                );
+                            })}
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+
+            {data.config.trend && (
+                <div className="flex items-center gap-2 text-sm">
+          <span className="font-medium">
+            Trending {data.config.trend.direction} by {data.config.trend.percentage}%
+          </span>
+                    {data.config.trend.direction === "up" ? (
+                        <TrendingUp className="h-4 w-4" />
+                    ) : (
+                        <TrendingDown className="h-4 w-4" />
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
+
 export function ChartRenderer({ data }: { data: ChartData }) {
   switch (data.chartType) {
     case "bar":
@@ -402,6 +573,8 @@ export function ChartRenderer({ data }: { data: ChartData }) {
       return <AreaChartComponent data={data} />;
     case "stackedArea":
       return <AreaChartComponent data={data} stacked />;
+    case "tabular":
+      return <TabularChartComponent data={data} />;
     default:
       return null;
   }
