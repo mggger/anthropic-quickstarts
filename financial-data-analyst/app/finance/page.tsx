@@ -479,7 +479,7 @@ export default function AIChat() {
 
       if (!response.ok) {
         const errorText = await response.json();
-        throw new Error(`HTTP error! message: ${errorText.details}`);
+        throw new Error(`Query Failed! message: ${errorText.error}`);
       }
 
       const data: APIResponse = await response.json();
