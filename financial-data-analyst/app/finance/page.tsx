@@ -505,7 +505,7 @@ export default function AIChat() {
         newMessages[newMessages.length - 1] = {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: `I encountered an error while processing your request. Error: ${error instanceof Error ? error.message : String(error)}`,
+          content: `${error instanceof Error ? error.message : String(error)}`,
         };
         return newMessages;
       });
