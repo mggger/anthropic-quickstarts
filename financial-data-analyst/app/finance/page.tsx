@@ -479,7 +479,7 @@ export default function AIChat() {
 
       if (!response.ok) {
         const errorText = await response.json();
-        throw new Error(`Query Failed! message: ${errorText.error}`);
+        throw new Error(`Query Failed! Please try specifying chart type (bar, area, line or pie). error message: ${errorText.error}`);
       }
 
       const data: APIResponse = await response.json();
