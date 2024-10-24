@@ -469,6 +469,30 @@ export function TabularChartComponent({ data }: { data: ChartData }) {
         document.body.removeChild(link);
     };
 
+
+    function formatAndTruncateValue(value: any, format?: string, maxLength: number = 30): {
+        displayValue: string;
+        fullValue: string;
+        needsTruncation: boolean;
+    } {
+        const formattedValue = formatValue(value, format);
+        const fullValue = String(formattedValue);
+
+        if (fullValue.length > maxLength) {
+            return {
+                displayValue: `${fullValue.substring(0, maxLength)}...`,
+                fullValue,
+                needsTruncation: true
+            };
+        }
+
+        return {
+            displayValue: fullValue,
+            fullValue,
+            needsTruncation: false
+        };
+    }
+
     return (
         <div className="w-full space-y-4">
             {(data.config.title || data.config.description) && (
@@ -533,7 +557,14 @@ export function TabularChartComponent({ data }: { data: ChartData }) {
                                             width: config.width || 'auto'
                                         }}
                                     >
-                                        {formatValue(value, config.format)}
+                                        {(() => {
+                                            const { displayValue, fullValue, needsTruncation } = formatAndTruncateValue(
+                                                value,
+                                                config.format
+                                            );
+
+                                            return displayValue;
+                                        })()}
                                     </TableCell>
                                 );
                             })}
