@@ -27,6 +27,7 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import type {ChartData} from "@/types/chart";
 import TopNavBar from "@/components/TopNavBar";
 import {readFileAsBase64, readFileAsPDFText, readFileAsText,} from "@/utils/fileHandling";
+import MarkdownContent from "@/components/ui/markdown";
 
 // Types
 interface Message {
@@ -143,7 +144,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
                   <ChartLine className="w-4 h-4 mr-1" /> Generated Chart
                 </Badge>
               )}
-              <span className="break-words">{message.content}</span>
+              <MarkdownContent content={message.content} />
             </div>
           ) : (
             <span>{message.content}</span>
