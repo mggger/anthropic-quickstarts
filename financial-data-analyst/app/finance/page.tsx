@@ -82,6 +82,27 @@ interface MessageComponentProps {
   message: Message;
 }
 
+const ReverseChartDisplay = ({ messages, chartEndRef, SafeChartRenderer }) => {
+  // Get only messages with chart data and reverse them
+  const chartsMessages = messages
+      .filter(message => message.chartData)
+      .reverse();
+
+  return (
+      <div className="min-h-full flex flex-col">
+        {chartsMessages.map((message, index) => (
+            <div
+                key={`chart-${index}`}
+                className="w-full min-h-full flex-shrink-0 snap-start snap-always"
+                ref={index === 0 ? chartEndRef : null}
+            >
+              <SafeChartRenderer data={message.chartData} />
+            </div>
+        ))}
+      </div>
+  );
+};
+
 const SafeChartRenderer: React.FC<{ data: ChartData }> = ({ data }) => {
   try {
     return (
@@ -769,25 +790,11 @@ export default function AIChat() {
             onScroll={handleChartScroll}
           >
             {messages.some((m) => m.chartData) ? (
-              <div className="min-h-full flex flex-col">
-                {messages.map(
-                  (message, index) =>
-                    message.chartData && (
-                      <div
-                        key={`chart-${index}`}
-                        className="w-full min-h-full flex-shrink-0 snap-start snap-always"
-                        ref={
-                          index ===
-                          messages.filter((m) => m.chartData).length - 1
-                            ? chartEndRef
-                            : null
-                        }
-                      >
-                        <SafeChartRenderer data={message.chartData} />
-                      </div>
-                    ),
-                )}
-              </div>
+                <ReverseChartDisplay
+                    messages={messages}
+                    chartEndRef={chartEndRef}
+                    SafeChartRenderer={SafeChartRenderer}
+                />
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center">
                 <div className="flex flex-col items-center justify-center gap-4 -translate-y-8">
