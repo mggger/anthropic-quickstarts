@@ -88,6 +88,30 @@ const ReverseChartDisplay = ({ messages, chartEndRef, SafeChartRenderer }) => {
       .filter(message => message.chartData)
       .reverse();
 
+  // Use useRef to track whether the component has mounted
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+
+    // Prevent scrolling on subsequent updates
+    const handleScroll = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const contentElement = chartEndRef.current?.parentElement;
+    if (contentElement) {
+      contentElement.addEventListener('scroll', handleScroll, { passive: false });
+      return () => {
+        contentElement.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, []);
+
   return (
       <div className="min-h-full flex flex-col">
         {chartsMessages.map((message, index) => (
@@ -95,6 +119,7 @@ const ReverseChartDisplay = ({ messages, chartEndRef, SafeChartRenderer }) => {
                 key={`chart-${index}`}
                 className="w-full min-h-full flex-shrink-0 snap-start snap-always"
                 ref={index === 0 ? chartEndRef : null}
+                style={{ scrollSnapAlign: 'start' }}
             >
               <SafeChartRenderer data={message.chartData} />
             </div>
@@ -328,6 +353,21 @@ export default function AIChat() {
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+
+    const csvTypes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    if (csvTypes.includes(file.type) || file.name.toLowerCase().endsWith('.csv') || file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
+      toast({
+        title: "Unsupported file type",
+        description: "CSV and Excel files are not supported",
+        variant: "destructive",
+      });
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
 
     setIsUploading(true);
 
