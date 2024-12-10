@@ -14,4 +14,4 @@ binding = 'R2_STORAGE'
 bucket_name = 'analyst'
 
 [vars]
-BACKEND_API_URL = "http://localhost:8000"
+BACKEND_API_URL = "http://poc1.roleai.chat"

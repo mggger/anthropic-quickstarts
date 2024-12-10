@@ -88,38 +88,13 @@ const ReverseChartDisplay = ({ messages, chartEndRef, SafeChartRenderer }) => {
       .filter(message => message.chartData)
       .reverse();
 
-  // Use useRef to track whether the component has mounted
-  const isMounted = useRef(false);
-
-  useEffect(() => {
-    if (!isMounted.current) {
-      isMounted.current = true;
-      return;
-    }
-
-    // Prevent scrolling on subsequent updates
-    const handleScroll = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    const contentElement = chartEndRef.current?.parentElement;
-    if (contentElement) {
-      contentElement.addEventListener('scroll', handleScroll, { passive: false });
-      return () => {
-        contentElement.removeEventListener('scroll', handleScroll);
-      };
-    }
-  }, []);
-
   return (
-      <div className="min-h-full flex flex-col">
+      <div className="min-h-full flex flex-col overflow-y-auto">
         {chartsMessages.map((message, index) => (
             <div
                 key={`chart-${index}`}
-                className="w-full min-h-full flex-shrink-0 snap-start snap-always"
+                className="w-full h-full flex-shrink-0"
                 ref={index === 0 ? chartEndRef : null}
-                style={{ scrollSnapAlign: 'start' }}
             >
               <SafeChartRenderer data={message.chartData} />
             </div>
@@ -334,21 +309,6 @@ export default function AIChat() {
       behavior: "smooth",
     });
   };
-
-  useEffect(() => {
-    const scrollToNewestChart = () => {
-      const chartsCount = messages.filter((m) => m.chartData).length;
-      if (chartsCount > 0) {
-        setCurrentChartIndex(chartsCount - 1);
-        scrollToChart(chartsCount - 1);
-      }
-    };
-
-    const lastChartIndex = messages.findLastIndex((m) => m.chartData);
-    if (lastChartIndex !== -1) {
-      setTimeout(scrollToNewestChart, 100);
-    }
-  }, [messages]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
