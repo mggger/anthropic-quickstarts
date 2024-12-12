@@ -147,62 +147,6 @@ export async function POST(req: NextRequest) {
 
         const responseData = await backendResponse.json();
 
-        if (responseData.needTabular) {
-            // 直接使用JSON数据，不需要解析CSV
-            const { column_names: columnNames, row_count: rowCount } = responseData.calculationResult.stats;
-            const rows = responseData.calculationResult.data; // 直接使用JSON数组数据
-
-            // 确定列格式
-            const columnFormats = columnNames.reduce((formats: Record<string, DataFormat>, colName: string) => {
-                // 检查第一个非空值来确定类型
-                const firstValue = rows.find(row => row[colName])?.[colName];
-
-                if (!firstValue) {
-                    formats[colName] = 'text';
-                    return formats;
-                }
-
-                // 尝试转换为数字来检查是否为数值类型
-                const numericValue = Number(firstValue);
-
-                if (isNaN(numericValue)) {
-                    formats[colName] = 'text';
-                } else {
-                    formats[colName] = String(firstValue).includes('%') ? 'percentage' : 'number';
-                }
-
-                return formats;
-            }, {});
-
-            // 创建列定义
-            const columns: ColumnDefinition[] = columnNames.map(name => ({
-                key: name,
-                label: name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' '),
-                format: columnFormats[name]
-            }));
-
-            // 创建表格配置
-            const chartConfig: ChartConfig = columnNames.reduce((config: ChartConfig, colName: string) => {
-                config[colName] = {
-                    label: colName.charAt(0).toUpperCase() + colName.slice(1).replace(/_/g, ' '),
-                    align: columnFormats[colName] === 'text' ? 'left' : 'right'
-                };
-                return config;
-            }, {});
-
-            // 创建表格数据结构
-            responseData.chartData = {
-                chartType: "tabular",
-                config: {
-                    title: "Data Table View",
-                    description: `Showing ${rowCount} records`,
-                    columns: columns
-                },
-                data: rows,
-                chartConfig: chartConfig
-            };
-        }
-
         console.log("✅ Backend API Response received:", {
             status: "success",
             hasToolUse: !!responseData.chartData,
