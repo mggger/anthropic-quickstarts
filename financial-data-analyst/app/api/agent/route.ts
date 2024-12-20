@@ -1,22 +1,10 @@
 // @ts-nocheck
 
 import { NextRequest, NextResponse } from "next/server";
-import {DataFormat} from "@/types/chart";
-import {ChartConfig} from "@/types/chart";
-import {ColumnDefinition} from "@/types/chart";
 
 export const runtime = "edge";
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL;
-
-// Helper to validate base64
-const isValidBase64 = (str: string) => {
-    try {
-        return btoa(atob(str)) === str;
-    } catch (err) {
-        return false;
-    }
-};
 
 interface RequestBody {
     messages: any[];
@@ -28,6 +16,20 @@ interface RequestBody {
     };
     model: string;
     dataSource?: any;
+}
+
+// Helper function to add CORS headers
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+};
+
+export async function OPTIONS(req: NextRequest) {
+    return new NextResponse(null, {
+        status: 204,
+        headers: corsHeaders,
+    });
 }
 
 export async function POST(req: NextRequest) {
@@ -43,14 +45,19 @@ export async function POST(req: NextRequest) {
             hasDataSource: !!dataSource,
         });
 
-
         // Input validation
         if (!messages || !Array.isArray(messages)) {
-            return NextResponse.json({ error: "Messages array is required" }, { status: 400 });
+            return NextResponse.json({ error: "Messages array is required" }, {
+                status: 400,
+                headers: corsHeaders
+            });
         }
 
         if (!model) {
-            return NextResponse.json({ error: "Model selection is required" }, { status: 400 });
+            return NextResponse.json({ error: "Model selection is required" }, {
+                status: 400,
+                headers: corsHeaders
+            });
         }
 
         // Convert all previous messages
@@ -65,7 +72,10 @@ export async function POST(req: NextRequest) {
 
             if (!base64) {
                 console.error("❌ No base64 data received");
-                return NextResponse.json({ error: "No file data" }, { status: 400 });
+                return NextResponse.json({ error: "No file data" }, {
+                    status: 400,
+                    headers: corsHeaders
+                });
             }
 
             try {
@@ -109,7 +119,10 @@ export async function POST(req: NextRequest) {
                 }
             } catch (error) {
                 console.error("Error processing file content:", error);
-                return NextResponse.json({ error: "Failed to process file content" }, { status: 400 });
+                return NextResponse.json({ error: "Failed to process file content" }, {
+                    status: 400,
+                    headers: corsHeaders
+                });
             }
         }
 
@@ -141,7 +154,10 @@ export async function POST(req: NextRequest) {
             console.error("❌ Backend API Error:", errorData);
             return NextResponse.json(
                 { error: errorData.error || "An error occurred while processing the request" },
-                { status: backendResponse.status }
+                {
+                    status: backendResponse.status,
+                    headers: corsHeaders
+                }
             );
         }
 
@@ -155,6 +171,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(responseData, {
             headers: {
+                ...corsHeaders,
                 "Cache-Control": "no-cache",
             },
         });
@@ -165,7 +182,10 @@ export async function POST(req: NextRequest) {
             {
                 error: error instanceof Error ? error.message : "An unknown error occurred",
             },
-            { status: 500 }
+            {
+                status: 500,
+                headers: corsHeaders
+            }
         );
     }
 }
